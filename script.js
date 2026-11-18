@@ -45,9 +45,10 @@
     $$("[data-split]").forEach((el) => {
       const r = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      const p = Math.min(1, Math.max(0, (vh * 0.85 - r.top) / (r.height + vh * 0.35)));
+      const atEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      const p = atEnd ? 1 : Math.min(1, Math.max(0, (vh * 0.9 - r.top) / (r.height + vh * 0.25)));
       const ws = $$(".w", el);
-      const n = Math.floor(p * ws.length * 1.05);
+      const n = Math.ceil(p * ws.length);
       ws.forEach((w, i) => w.classList.toggle("on", i < n));
     });
   };
@@ -101,8 +102,9 @@
   /* ---------- custom cursor ---------- */
   if (fine && !reduce) {
     const c = $("#cursor"), d = $("#cursorDot");
+    document.addEventListener("mouseleave", () => document.body.classList.remove("cursor-on"));
     let mx = innerWidth / 2, my = innerHeight / 2, cx = mx, cy = my;
-    window.addEventListener("mousemove", (e) => { mx = e.clientX; my = e.clientY; d.style.transform = `translate(${mx}px, ${my}px)`; });
+    window.addEventListener("mousemove", (e) => { document.body.classList.add("cursor-on"); mx = e.clientX; my = e.clientY; d.style.transform = `translate(${mx}px, ${my}px)`; });
     const loop = () => { cx += (mx - cx) * 0.16; cy += (my - cy) * 0.16; c.style.transform = `translate(${cx}px, ${cy}px)`; requestAnimationFrame(loop); };
     loop();
     $$("a, button, .tags span, .card, .stat").forEach((el) => {
@@ -136,9 +138,10 @@
       el.addEventListener("mousemove", (e) => {
         const r = el.getBoundingClientRect();
         const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+        el.style.transition = "border-color 0.4s, transform 0.15s ease-out";
         el.style.transform = `perspective(700px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-4px)`;
       });
-      el.addEventListener("mouseleave", () => (el.style.transform = ""));
+      el.addEventListener("mouseleave", () => { el.style.transition = "border-color 0.4s, transform 0.6s var(--ease)"; el.style.transform = ""; });
     });
 
     /* stat spotlight */
